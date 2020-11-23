@@ -14,9 +14,20 @@ app.get('/', (req, res) => {
   return (response(res, 'Backend for CONNECT app chat with us!'))
 })
 
+// auth middleware
+const authUser = require('./middlewares/auth')
+
 // user route
 const userRoute = require('./routes/user')
 app.use('/user', userRoute)
+
+// auth route
+const authRoute = require('./routes/auth')
+app.use('/auth', authRoute)
+
+// chat route
+const chatRoute = require('./routes/chat')
+app.use('/chat', authUser, chatRoute)
 
 app.listen(process.env.APP_PORT, () => {
   console.log(`App listening on port ${process.env.APP_PORT}`)

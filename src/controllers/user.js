@@ -39,9 +39,10 @@ module.exports = {
       Object.assign(userData, { password })
 
       // create new data on database
-      const results = await User.findByPk({ id: 1 })
-      // // delete hashed password and adminId to be displayed
-      // delete results.dataValues.password
+      const results = await User.create(userData)
+
+      // delete hashed password and adminId to be displayed
+      delete results.dataValues.password
 
       return response(res, 'user has created', { results })
     } catch (err) {
@@ -77,18 +78,21 @@ module.exports = {
         return response(res, 'User Not Found!', {}, 400, false)
       }
 
-      let { password } = userData
-      password = await bcrypt.hash(password, 10)
-      Object.assign(userData, { password })
+      if (userData.password) {
+        let { password } = userData
+        password = await bcrypt.hash(password, 10)
+        Object.assign(userData, { password })
+      }
 
       // create new data on database
-      const results = await User.create(userData)
+      const results = await user.update(userData)
 
       // delete hashed password and adminId to be displayed
       delete results.dataValues.password
 
       return response(res, 'user updated successfully', { results })
     } catch (err) {
+      console.log(err)
       return response(res, err.message, { err }, 500, false)
     }
   },
