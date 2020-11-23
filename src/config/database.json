@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "kodri123",
+    "database": "connect_development",
+    "host": "54.147.22.87",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "kodri123",
+    "database": "connect_test",
+    "host": "54.147.22.87",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "kodri123",
+    "database": "connect_production",
+    "host": "54.147.22.87",
+    "dialect": "mysql"
+  }
+}
