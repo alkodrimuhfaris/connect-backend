@@ -27,7 +27,10 @@ module.exports = {
 
     try {
       const { phone } = credentials
-      const [user, created] = await User.findOrCreate({ where: { phone } })
+      const [user, created] = await User.findOrCreate({
+        where: { phone },
+        attributes: { exclude: ['password'] }
+      })
 
       console.log(user)
       const token = await jwt.sign({

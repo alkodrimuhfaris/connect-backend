@@ -1,7 +1,7 @@
 const qs = require('qs')
 
 module.exports = {
-  paging: (path, req, count = 0, page = 1, limit = 10) => {
+  paging: (path, req, count = 0, page = 1, limit = 20) => {
     let pages = 1
     if (limit === '-') {
       page = 1
@@ -30,7 +30,7 @@ module.exports = {
     })
   },
   pagePrep: (req) => {
-    let { page = 1, limit = 10 } = req
+    let { page = 1, limit = 20 } = req
     let offset = 0
     if (limit === '-') {
       page = 1

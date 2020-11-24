@@ -2,6 +2,7 @@ const { Chat, User } = require('../models')
 const response = require('../helpers/response')
 const joi = require('joi')
 const { Op } = require('sequelize')
+const pagination = require('../helpers/pagination')
 
 module.exports = {
   createChat: async (req, res) => {
@@ -117,7 +118,12 @@ module.exports = {
     }
     colluctor = Number(colluctor)
 
+    const path = 'chat/colluctor/' + colluctor
+    const { limit, page, offset } = pagination.pagePrep(req.query)
+
     try {
+      let count = 0
+      let results = []
       const colluctorProfile = await User.findByPk(
         colluctor,
         {
@@ -129,21 +135,37 @@ module.exports = {
         return response(res, 'colluctor not found', {}, 400, false)
       }
 
-      const results = await Chat.findAll({
-        where: {
-          [Op.or]: [
-            { [Op.and]: [{ reciever: self }, { sender: colluctor }] },
-            { [Op.and]: [{ reciever: colluctor }, { sender: self }] }
-          ]
-        },
-        order: [['createdAt', 'DESC']]
-      })
-
-      if (!results.length) {
-        return response(res, 'You have no history chat with this account', { colluctorProfile, results })
+      if (limit !== '-') {
+        ({ count, rows: results } = await Chat.findAndCountAll({
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { [Op.and]: [{ reciever: self }, { sender: colluctor }] },
+              { [Op.and]: [{ reciever: colluctor }, { sender: self }] }
+            ]
+          },
+          order: [['createdAt', 'DESC']]
+        }))
+      } else {
+        ({ count, rows: results } = await Chat.findAndCountAll({
+          where: {
+            [Op.or]: [
+              { [Op.and]: [{ reciever: self }, { sender: colluctor }] },
+              { [Op.and]: [{ reciever: colluctor }, { sender: self }] }
+            ]
+          },
+          order: [['createdAt', 'DESC']]
+        }))
       }
 
-      return response(res, 'chat history with id ' + colluctor, { colluctorProfile, results })
+      const pageInfo = pagination.paging(path, req, count, page, limit)
+
+      if (!results.length) {
+        return response(res, 'You have no history chat with this account', { colluctorProfile, results, pageInfo })
+      }
+
+      return response(res, 'chat history with id ' + colluctor, { colluctorProfile, results, pageInfo })
     } catch (err) {
       console.log(err)
       return response(res, err.message, { err }, 500, false)
@@ -151,36 +173,99 @@ module.exports = {
   },
   getAllListChat: async (req, res) => {
     const { id: self } = req.user
-    try {
-      const results = await Chat.findAll({
-        where: {
-          [Op.or]: [{ reciever: self }, { sender: self }],
-          lastChat: true
-        },
-        include: [
-          {
-            model: User,
-            as: 'senderProfile',
-            attributes: [
-              'name', 'ava', 'phone', 'id'
-            ]
-          },
-          {
-            model: User,
-            as: 'recieverProfile',
-            attributes: [
-              'name', 'ava', 'phone', 'id'
-            ]
-          }
-        ],
-        order: [['createdAt', 'DESC']]
-      })
 
-      if (!results.length) {
-        return response(res, 'You have no history chat start chatting!', { results })
+    const path = 'chat/list/all'
+    const { limit, page, offset } = pagination.pagePrep(req.query)
+
+    try {
+      let count = 0
+      let results = []
+
+      if (limit !== '-') {
+        ({ count, rows: results } = await Chat.findAndCountAll({
+          limit,
+          offset,
+          where: {
+            [Op.or]: [{ reciever: self }, { sender: self }],
+            lastChat: true
+          },
+          include: [
+            {
+              model: User,
+              as: 'senderProfile',
+              attributes: [
+                'name', 'ava', 'phone', 'id'
+              ]
+            },
+            {
+              model: User,
+              as: 'recieverProfile',
+              attributes: [
+                'name', 'ava', 'phone', 'id'
+              ]
+            }
+          ],
+          order: [['createdAt', 'DESC']]
+        }))
+      } else {
+        ({ count, rows: results } = await Chat.findAndCountAll({
+          where: {
+            [Op.or]: [{ reciever: self }, { sender: self }],
+            lastChat: true
+          },
+          include: [
+            {
+              model: User,
+              as: 'senderProfile',
+              attributes: [
+                'name', 'ava', 'phone', 'id'
+              ]
+            },
+            {
+              model: User,
+              as: 'recieverProfile',
+              attributes: [
+                'name', 'ava', 'phone', 'id'
+              ]
+            }
+          ],
+          order: [['createdAt', 'DESC']]
+        }))
       }
 
-      return response(res, 'List all chat', { results })
+      const pageInfo = pagination.paging(path, req, count, page, limit)
+
+      console.log(results)
+
+      console.log(results.length)
+
+      if (results.length) {
+        console.log('cek')
+        results = results.map((result) => {
+          console.log('masuk gak ni?')
+          const { senderProfile, recieverProfile } = result.dataValues
+          let colluctorProfile = {}
+          if (senderProfile.id === self) {
+            console.log('colluctor = reciever')
+            colluctorProfile = {
+              ...recieverProfile.dataValues
+            }
+          } else if (recieverProfile.id === self) {
+            console.log('colluctor = sender')
+            colluctorProfile = {
+              ...senderProfile.dataValues
+            }
+          }
+          delete result.dataValues.recieverProfile
+          delete result.dataValues.senderProfile
+          Object.assign(result.dataValues, { colluctorProfile })
+          console.log(result)
+          return result.dataValues
+        })
+        return response(res, 'List all chat', { results, pageInfo })
+      }
+
+      return response(res, 'You have no history chat start chatting!', { results, pageInfo })
     } catch (err) {
       console.log(err)
       return response(res, err.message, { err }, 500, false)
