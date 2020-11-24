@@ -134,5 +134,89 @@ module.exports = {
     } catch (err) {
       return response(res, err.message, { err }, 500, false)
     }
+  },
+  getPassword: async (req, res) => {
+    const { id } = req.user
+    try {
+      const results = await User.findByPk(id)
+      if (!results) {
+        return response(res, 'User Not Found!', {}, 400, false)
+      }
+      const passwordExist = !!results.password
+      return response(res, 'user profile', { passwordExist })
+    } catch (err) {
+      return response(res, err.message, { err }, 500, false)
+    }
+  },
+  changePassword: async (req, res) => {
+    const { id } = req.user
+    const { oldPassword, newPassword, confirmPassword } = req.body
+    const passData = { oldPassword, newPassword, confirmPassword }
+    const scheme = joi.object({
+      oldPassword: joi.string().required(),
+      newPassword: joi.string().required(),
+      confirmPassword: joi.string().required().valid(joi.ref('newPassword'))
+    })
+    const { value: dataPass, error } = scheme.validate(passData)
+
+    if (error) {
+      return response(res, 'Error', { error: error.message }, 400, false)
+    }
+
+    try {
+      const { newPassword, oldPassword } = dataPass
+      const result = await User.findByPk(id)
+
+      if (!result) {
+        return response(res, 'user is not exist!', {}, 400, false)
+      }
+
+      // compare password
+      const passCheck = await bcrypt.compare(oldPassword, result.dataValues.password)
+
+      // error handling on wrong password
+      if (!passCheck) {
+        return response(res, 'Wrong password!', {}, 400, false)
+      }
+
+      // password hashing
+      const password = await bcrypt.hash(newPassword, 10)
+
+      await result.update({ password })
+      return response(res, 'Password updated succesfully!')
+    } catch (err) {
+      return response(res, err.message, { err }, 500, false)
+    }
+  },
+  addPassword: async (req, res) => {
+    const { id } = req.user
+    const { newPassword, confirmPassword } = req.body
+    const passData = { newPassword, confirmPassword }
+    const scheme = joi.object({
+      newPassword: joi.string().required(),
+      confirmPassword: joi.string().required().valid(joi.ref('newPassword'))
+    })
+    const { value: dataPass, error } = scheme.validate(passData)
+
+    if (error) {
+      return response(res, 'Error', { error: error.message }, 400, false)
+    }
+
+    try {
+      const { newPassword } = dataPass
+      const result = await User.findByPk(id)
+
+      if (!result) {
+        return response(res, 'user is not exist!', {}, 400, false)
+      }
+
+      // password hashing
+      const password = await bcrypt.hash(newPassword, 10)
+
+      await result.update({ password })
+      return response(res, 'Password updated succesfully!')
+    } catch (err) {
+      return response(res, err.message, { err }, 500, false)
+    }
   }
 }
