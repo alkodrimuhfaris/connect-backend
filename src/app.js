@@ -29,6 +29,9 @@ app.use('/auth', authRoute)
 const chatRoute = require('./routes/chat')
 app.use('/chat', authUser, chatRoute)
 
+// static folder access
+app.use('/Uploads', express.static('./Assets/Public/Uploads'))
+
 app.listen(process.env.APP_PORT, () => {
   console.log(`App listening on port ${process.env.APP_PORT}`)
 })
