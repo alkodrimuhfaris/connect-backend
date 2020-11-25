@@ -53,6 +53,7 @@ module.exports = {
   patchUser: async (req, res) => {
     const { id } = req.user
     const { email, password, name, idName, status, phone } = req.body
+    console.log(req.file)
     const ava = req.file ? 'Uploads/' + req.file.filename : undefined
 
     const data = { email, password, name, idName, status, phone, ava }
