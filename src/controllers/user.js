@@ -3,6 +3,8 @@ const response = require('../helpers/response')
 const joi = require('joi')
 const bcrypt = require('bcryptjs')
 const fs = require('fs')
+const queryUser = require('../helpers/searchUser')
+const pagination = require('../helpers/pagination')
 // const { v4: uuidv4 } = require('uuid')
 // const sendMail = require('../helpers/sendMail')
 
@@ -107,6 +109,33 @@ module.exports = {
       }
       delete results.dataValues.password
       return response(res, 'user profile', { results })
+    } catch (err) {
+      return response(res, err.message, { err }, 500, false)
+    }
+  },
+  getAllUser: async (req, res) => {
+    const path = 'user/get/all'
+    const { where, order } = queryUser(req.query)
+    const { limit, page, offset } = pagination.pagePrep(req.query)
+
+    try {
+      const { count, rows: results } = await User.findAndCountAll({
+        limit,
+        offset,
+        order,
+        where,
+        attributes: {
+          exclude: ['password']
+        }
+      })
+
+      const pageInfo = pagination.paging(path, req, count, page, limit)
+
+      let msg = 'list all of the user'
+      if (!results.length) {
+        msg = 'there is no user data in here'
+      }
+      return response(res, msg, { results, pageInfo })
     } catch (err) {
       return response(res, err.message, { err }, 500, false)
     }

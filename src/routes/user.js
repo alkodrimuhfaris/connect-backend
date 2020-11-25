@@ -8,6 +8,11 @@ route.post('/create', multerSingle('avatar'), userCtl.createUser)
 route.patch('/update', authMiddleware, multerSingle('avatar'), userCtl.patchUser)
 route.get('/', authMiddleware, userCtl.getUser)
 route.delete('/delete', authMiddleware, userCtl.deleteUser)
+
+route.get('/get/all', authMiddleware, userCtl.getAllUser)
+route.get('/get/detail/:id', authMiddleware, userCtl.getUserById)
+
+// password
 route.get('/check/password', authMiddleware, userCtl.getPassword)
 route.patch('/password/update', authMiddleware, userCtl.changePassword)
 route.patch('/password/add', authMiddleware, userCtl.addPassword)

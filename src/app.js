@@ -29,6 +29,10 @@ app.use('/auth', authRoute)
 const chatRoute = require('./routes/chat')
 app.use('/chat', authUser, chatRoute)
 
+// friend route
+const friendRoute = require('./routes/friend')
+app.use('/friend', authUser, friendRoute)
+
 // static folder access
 app.use('/Uploads', express.static('./Assets/Public/Uploads'))
 

@@ -10,12 +10,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Friend.belongsTo(models.User, { as: 'FriendDetail', foreignKey: 'friendId' })
     }
   };
   Friend.init({
     userId: DataTypes.INTEGER,
     friendId: DataTypes.INTEGER,
+    name: DataTypes.STRING,
     hidden: DataTypes.BOOLEAN,
     block: DataTypes.BOOLEAN
   }, {
