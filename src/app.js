@@ -10,6 +10,9 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 app.use(cors())
 
+const server = require('http').createServer(app)
+const io = require('socket.io')
+
 app.get('/', (req, res) => {
   return (response(res, 'Backend for CONNECT app chat with us!'))
 })
@@ -36,6 +39,8 @@ app.use('/friend', authUser, friendRoute)
 // static folder access
 app.use('/Uploads', express.static('./Assets/Public/Uploads'))
 
-app.listen(process.env.APP_PORT, () => {
+server.listen(process.env.APP_PORT, () => {
   console.log(`App listening on port ${process.env.APP_PORT}`)
 })
+
+module.exports = io

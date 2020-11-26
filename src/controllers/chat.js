@@ -3,6 +3,7 @@ const response = require('../helpers/response')
 const joi = require('joi')
 const { Op } = require('sequelize')
 const pagination = require('../helpers/pagination')
+const io = require('../app')
 
 module.exports = {
   createChat: async (req, res) => {
@@ -10,13 +11,14 @@ module.exports = {
     const { id: reciever } = req.params
     const { chat } = req.body
 
-    const data = { chat, sender, reciever, lastChat: true }
+    const data = { chat, sender, reciever, lastChat: true, unread: true }
 
     const schema = joi.object({
       chat: joi.string(),
       sender: joi.number(),
       reciever: joi.number(),
-      lastChat: joi.boolean()
+      lastChat: joi.boolean(),
+      unread: joi.boolean()
     })
     const { value: chatData, error } = schema.validate(data)
     if (error) {
@@ -38,8 +40,36 @@ module.exports = {
         await getLastChat.update({ lastChat: false })
       }
       const sendChat = await Chat.create(chatData)
-
+      const senderData = await User.findByPk(
+        sender,
+        {
+          attributes: { exclude: ['password'] }
+        }
+      )
+      io.emit(`send ${reciever}`, { senderData, chat })
       return response(res, 'sent chat success', { sendChat })
+    } catch (err) {
+      console.log(err)
+      return response(res, err.message, { err }, 500, false)
+    }
+  },
+  updateRead: async (req, res) => {
+    const { id: reciever } = req.user
+    const { id: sender } = req.params
+    try {
+      const unreadChat = await Chat.findAll({
+        where: {
+          sender,
+          reciever,
+          unread: true
+        }
+      })
+      if (!unreadChat.length) {
+        return response(res, 'all chat has been read')
+      }
+      await unreadChat.update({ unread: false })
+      io.emit(`read ${reciever}`, { reciever, read: true })
+      return response(res, 'all recent chat has been updated to read')
     } catch (err) {
       console.log(err)
       return response(res, err.message, { err }, 500, false)
@@ -240,18 +270,14 @@ module.exports = {
       console.log(results.length)
 
       if (results.length) {
-        console.log('cek')
         results = results.map((result) => {
-          console.log('masuk gak ni?')
           const { senderProfile, recieverProfile } = result.dataValues
           let colluctorProfile = {}
           if (senderProfile.id === self) {
-            console.log('colluctor = reciever')
             colluctorProfile = {
               ...recieverProfile.dataValues
             }
           } else if (recieverProfile.id === self) {
-            console.log('colluctor = sender')
             colluctorProfile = {
               ...senderProfile.dataValues
             }
