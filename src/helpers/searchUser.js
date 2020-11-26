@@ -8,7 +8,7 @@ module.exports = (req) => {
   const whereName = { [Op.and]: { name: { [Op.like]: `%${search}%` } } }
 
   let where = [
-    { phone: { [Op.like]: `%${search}%` } }
+    { name: { [Op.like]: `%${search}%` } }
   ]
 
   order = Object.entries(order)
