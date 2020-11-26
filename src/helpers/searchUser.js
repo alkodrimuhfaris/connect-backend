@@ -2,7 +2,7 @@ const { Op } = require('sequelize')
 
 module.exports = (req) => {
   console.log(req.search)
-  let { search = '', order = { name: 'ASC' }, id = '' } = req
+  let { search = '', order = { name: 'ASC' }, idName = '' } = req
   console.log(search)
 
   const whereName = { [Op.and]: { name: { [Op.like]: `%${search}%` } } }
@@ -18,8 +18,8 @@ module.exports = (req) => {
 
   order = Object.entries(order)
 
-  id = id ? { id } : null
-  id && where.push(id)
+  idName = idName ? { idName } : null
+  idName && where.push(idName)
 
   where = { [Op.and]: where }
 
