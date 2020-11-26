@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Friend } = require('../models')
 const response = require('../helpers/response')
 const joi = require('joi')
 const bcrypt = require('bcryptjs')
@@ -114,6 +114,7 @@ module.exports = {
     }
   },
   getAllUser: async (req, res) => {
+    const { id: userId } = req.user
     const path = 'user/get/all'
     const { where, order } = queryUser(req.query)
     const { limit, page, offset } = pagination.pagePrep(req.query)
@@ -126,7 +127,15 @@ module.exports = {
         where,
         attributes: {
           exclude: ['password']
-        }
+        },
+        include: [
+          {
+            model: Friend,
+            as: 'FriendDetail',
+            where: { userId },
+            required: false
+          }
+        ]
       })
 
       const pageInfo = pagination.paging(path, req, count, page, limit)

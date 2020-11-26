@@ -18,6 +18,10 @@ module.exports = {
       if (!findId) {
         return response(res, 'user id is not exist!', {}, 400, false)
       }
+      const getFriend = await Friend.findOne({ userId, friendId })
+      if (getFriend) {
+        return response(res, 'you already add this user as a friend!', {}, 400, false)
+      }
       const result = await Friend.create({ userId, friendId })
       return response(res, 'user on id ' + friendId + ' successfully added as a friend!', { result })
     } catch (err) {
