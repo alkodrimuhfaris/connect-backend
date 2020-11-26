@@ -1,7 +1,7 @@
 const { Friend, User } = require('../models')
 const response = require('../helpers/response')
 const joi = require('joi')
-const queryUser = require('../helpers/searchUser')
+const queryUser = require('../helpers/searchFriend')
 const pagination = require('../helpers/pagination')
 
 module.exports = {
