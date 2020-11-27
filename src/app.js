@@ -14,6 +14,10 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server, {})
 module.exports = io
 
+io.on('connection', socket => {
+  console.log('a user connected')
+})
+
 app.get('/', (req, res) => {
   return (response(res, 'Backend for CONNECT app chat with us!'))
 })
@@ -43,4 +47,3 @@ app.use('/Uploads', express.static('./Assets/Public/Uploads'))
 server.listen(process.env.APP_PORT, () => {
   console.log(`App listening on port ${process.env.APP_PORT}`)
 })
-

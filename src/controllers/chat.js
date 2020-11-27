@@ -46,7 +46,8 @@ module.exports = {
           attributes: { exclude: ['password'] }
         }
       )
-      io.emit(`send ${reciever}`, { senderData, chat })
+      const sendEvent = 'send ' + reciever
+      io.emit(sendEvent, { senderData, chat })
       return response(res, 'sent chat success', { sendChat })
     } catch (err) {
       console.log(err)
@@ -77,7 +78,8 @@ module.exports = {
           }
         }
       )
-      io.emit(`read ${sender}`, { reciever, read: true })
+      const readEvent = 'read ' + sender;
+      io.emit(readEvent, { reciever, read: true })
       return response(res, 'all recent chat has been updated to read')
     } catch (err) {
       console.log(err)
