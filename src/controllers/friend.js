@@ -113,6 +113,7 @@ module.exports = {
   },
   getAllFriends: async (req, res) => {
     const path = 'friend/get/all'
+    const { id: userId } = req.user
     const { where, order } = queryUser(req.query)
     const { limit, page, offset } = pagination.pagePrep(req.query)
 
@@ -121,6 +122,7 @@ module.exports = {
         limit,
         offset,
         order,
+        where: { userId },
         include: [
           {
             model: User,
