@@ -11,7 +11,7 @@ app.use(morgan('dev'))
 app.use(cors())
 
 const server = require('http').createServer(app)
-const io = require('socket.io')
+const io = require('socket.io')(server, {})
 
 app.get('/', (req, res) => {
   return (response(res, 'Backend for CONNECT app chat with us!'))
