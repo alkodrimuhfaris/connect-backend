@@ -78,7 +78,7 @@ module.exports = {
           }
         }
       )
-      const readEvent = 'read ' + sender;
+      const readEvent = 'read ' + sender
       io.emit(readEvent, { reciever, read: true })
       return response(res, 'all recent chat has been updated to read')
     } catch (err) {

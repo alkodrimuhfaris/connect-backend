@@ -91,7 +91,7 @@ module.exports = {
       }, process.env.APP_KEY)
 
       // final response
-      return response(res, 'Login Success!', { token })
+      return response(res, 'Login Success!', { token, id: userCheck.dataValues.id })
     } catch (err) {
       return response(res, err.message, {}, 400, false)
     }
