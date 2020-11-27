@@ -67,8 +67,17 @@ module.exports = {
       if (!unreadChat.length) {
         return response(res, 'all chat has been read')
       }
-      await unreadChat.update({ unread: false })
-      io.emit(`read ${reciever}`, { reciever, read: true })
+      await Chat.update(
+        { unread: false },
+        {
+          where: {
+            sender,
+            reciever,
+            unread: true
+          }
+        }
+      )
+      io.emit(`read ${sender}`, { reciever, read: true })
       return response(res, 'all recent chat has been updated to read')
     } catch (err) {
       console.log(err)
