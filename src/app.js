@@ -12,6 +12,7 @@ app.use(cors())
 
 const server = require('http').createServer(app)
 const io = require('socket.io')(server, {})
+module.exports = io
 
 app.get('/', (req, res) => {
   return (response(res, 'Backend for CONNECT app chat with us!'))
@@ -43,4 +44,3 @@ server.listen(process.env.APP_PORT, () => {
   console.log(`App listening on port ${process.env.APP_PORT}`)
 })
 
-module.exports = io
